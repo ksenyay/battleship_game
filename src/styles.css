@@ -77,8 +77,21 @@ body {
 }
 
 h1 {
-  margin-bottom: 100px;
   margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-weight: 500;
+}
+
+button {
+  margin: 10px 5px;
+  cursor: pointer;
+}
+
+.button-container {
+  margin-bottom: 20px;
 }
 
 .gameboard {
@@ -99,9 +112,10 @@ h1 {
   border: 2px solid black;
   box-sizing: content-box;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.grid-element {
+.grid-container > * {
   width: 50px;
   height: 50px;
   border: 1px solid grey;
@@ -109,4 +123,88 @@ h1 {
   justify-content: center;
   align-items: center;
   padding: 0;
+  font-size: 2em;
+}
+
+.player-names {
+  display: flex;
+  flex-direction: row;
+  font-size: 1.5em;
+}
+
+.player-names > div {
+  display: flex;
+  justify-content: center;
+}
+
+.active {
+  font-weight: bold;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form label {
+  display: block;
+  padding-top: 5px;
+}
+
+.form input {
+  width: 100%;
+}
+
+.form button {
+  display: block;
+  width: 100px;
+  align-self: center;
+}
+
+.form h2 {
+  font-size: 1.5em;
+  font-weight: 500;
+  align-self: center;
+}
+
+.name-container {
+  width: 50%;
+}
+
+.board-container {
+  display: none;
+  margin-top: 100px;
+}
+
+.form div {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.show {
+  display: flex;
+  justify-self: center;
+  margin-top: 5px;
+}
+
+.restart {
+  display: flex;
+  justify-self: center;
+  margin-top: 5px;
+}
+
+.popup {
+  position: absolute;
+  color: rgb(65, 65, 65);
+  padding: 5px 10px;
+  margin-top: 70px;
+  font-size: 1.5em;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s ease-out;
+}
+
+.popup.fade-out {
+  opacity: 0;
 }

@@ -7,9 +7,33 @@
     <title>Battleship</title>
 </head>
 <body>
-    <h1>Battleship</h1>
-    <div class="gameboard">
+    <h1>Battleship Game</h1>
 
+    <form class="form">
+        <h2>Please enter player names:</h2>
+        <div>
+            <label for="player-one">Player 1 <input type="text" id="player-one" name="player_one_name" required maxlength="15"></label>
+            <label for="player-two">Player 2<input type="text" id="player-two" name="player_two_name" required maxlength="15"></label>
+        </div>
+        <button type="submit" class="start-game">Start Game</button>
+    </form>
+
+    <div class="board-container">
+        <div class="player-names">
+            <div class="name-container">
+                <h3 class="player-name active" id="player-one-name"></h3>
+            </div>
+            <div class="name-container">
+                <h3 class="player-name" id="player-two-name"></h3>
+            </div>
+        </div>
+        <div class="gameboard">
+    
+        </div>
+        <div class="show">
+            <button class="show-ships">Show Ships</button>
+        </div>
     </div>
+    
 </body>
 </html>
