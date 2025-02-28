@@ -75,10 +75,11 @@ body {
   justify-content: flex-start;
   align-items: center;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
 }
 
 h1 {
-  margin-top: 5px;
+  margin-top: 20px;
   margin-bottom: 10px;
 }
 
@@ -156,6 +157,11 @@ button {
   width: 100%;
 }
 
+.form input:valid {
+  border: 2px solid green;
+  border-radius: 3px;
+}
+
 .form button {
   display: block;
   width: 100px;
@@ -163,9 +169,11 @@ button {
 }
 
 .form h2 {
-  font-size: 1.5em;
-  font-weight: 500;
+  font-size: 1.3em;
+  font-weight: 400;
   align-self: center;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 .name-container {

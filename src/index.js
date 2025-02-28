@@ -724,6 +724,11 @@ class GameManager {
         .replace(/\s+/g, "_")
         .trim();
 
+      if (playerOneCleaned === playerTwoCleaned) {
+        alert("You cannot enter two identical names!");
+        return;
+      }
+
       boardContainer.style.display = "block";
       this.createNewGame(playerOneCleaned, playerTwoCleaned);
 
