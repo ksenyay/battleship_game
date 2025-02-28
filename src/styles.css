@@ -74,6 +74,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h1 {
@@ -207,4 +208,81 @@ button {
 
 .popup.fade-out {
   opacity: 0;
+}
+
+/* SHIP MANAGER */
+
+.ship-manager {
+  width: 700px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.ship-manager > * {
+  height: 50px;
+
+  display: flex;
+  flex-direction: row;
+  box-sizing: content-box;
+  cursor: pointer;
+  border: 2px solid rgb(128, 128, 128, 0.5);
+}
+
+#four-cell-ship {
+  width: 200px;
+}
+
+#four-cell-ship div {
+  border: 1px solid rgb(128, 128, 128, 0.5);
+  height: 50px;
+  width: 50px;
+}
+
+#three-cell-ship {
+  width: 150px;
+}
+
+#three-cell-ship div {
+  border: 1px solid rgb(128, 128, 128, 0.5);
+  height: 50px;
+  width: 50px;
+}
+
+#two-cell-ship {
+  width: 100px;
+}
+
+#two-cell-ship div {
+  border: 1px solid rgb(128, 128, 128, 0.5);
+  height: 50px;
+  width: 50px;
+}
+
+#one-cell-ship {
+  width: 50px;
+}
+
+#one-cell-ship div {
+  border: 1px solid rgb(128, 128, 128, 0.5);
+  height: 50px;
+  width: 50px;
+}
+
+.highlight {
+  border: 3px solid green;
+}
+
+.ship-counter {
+  margin-top: 20px;
+  margin-left: 2px;
+  display: grid;
+  grid-template-columns: 200px 150px 100px 50px;
+  gap: 65px;
+  font-weight: 600;
+}
+
+.ship-counter div {
+  text-align: center;
 }
