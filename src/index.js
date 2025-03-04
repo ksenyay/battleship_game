@@ -242,6 +242,85 @@ class ManageDOM {
     this.renderBoard(this.player2);
   }
 
+  areShipsOverlapping(currentShip) {
+    const isOverlappingRed = currentShip.coordinates.some(({ x, y }) => {
+      const cell = document.querySelector(
+        `.grid-element-${this.currentPlayer.name}[data-col="${y}"][data-row="${x}"]`,
+      );
+      return cell && cell.classList.contains("unavailable");
+    });
+
+    if (isOverlappingRed) {
+      currentShip = null;
+
+      this.removeHighlight();
+
+      return false;
+    }
+  }
+
+  canShipBePlaced(currentShip, orientation) {
+    if (!currentShip.coordinates.length === currentShip.size) {
+      return false;
+    }
+
+    const unavailableCells = (x, y) => {
+      const cell = document.querySelector(
+        `.grid-element-${this.currentPlayer.name}[data-col="${y}"][data-row="${x}"]`,
+      );
+      if (cell) {
+        cell.classList.add("unavailable");
+      }
+    };
+
+    if (orientation === "horizontal") {
+      // Highlight top and bottom for each coordinate
+      currentShip.coordinates.forEach((coord) => {
+        unavailableCells(coord.x - 1, coord.y); // Top
+        unavailableCells(coord.x + 1, coord.y); // Bottom
+      });
+
+      // Highlight the right and left ends of the ship
+      unavailableCells(
+        currentShip.coordinates[0].x,
+        currentShip.coordinates[0].y - 1,
+      ); // Right
+      unavailableCells(
+        currentShip.coordinates[0].x,
+        currentShip.coordinates[currentShip.length - 1].y + 1,
+      ); // Left
+    } else {
+      // Highlight right and left for each coordinate
+      currentShip.coordinates.forEach((coord) => {
+        unavailableCells(coord.x, coord.y - 1); // Right
+        unavailableCells(coord.x, coord.y + 1); // Left
+      });
+
+      // Highlight the top and bottom ends of the ship
+      unavailableCells(
+        currentShip.coordinates[0].x - 1,
+        currentShip.coordinates[0].y,
+      ); // Top
+      unavailableCells(
+        currentShip.coordinates[currentShip.length - 1].x + 1,
+        currentShip.coordinates[0].y,
+      ); // Bottom
+    }
+
+    return true;
+  }
+
+  removeHighlight() {
+    const gridCells = document.querySelectorAll(
+      `.grid-element-${this.currentPlayer.name}`,
+    );
+
+    gridCells.forEach((cell) => {
+      cell.classList.remove("highlight");
+      cell.draggable = false;
+    });
+  }
+
   placeShips(player) {
     ShipPlacer.restartShips();
 
@@ -290,13 +369,11 @@ class ManageDOM {
         let row = parseInt(cell.getAttribute("data-row"));
 
         // Clear previous highlights
-        gridCells.forEach((cell) => {
-          cell.classList.remove("highlight");
-          cell.draggable = false;
-        });
+        this.removeHighlight();
 
         // Determine ship coordinates based on orientation
         let shipCoordinates = [];
+
         for (let i = 0; i < shipSize; i++) {
           if (orientation === "horizontal") {
             if (shipSize === 4 || shipSize === 3) {
@@ -314,6 +391,8 @@ class ManageDOM {
         }
 
         // Check if ship fits within grid boundaries
+        if (!shipCoordinates) return;
+
         const isWithinBounds = shipCoordinates.every(
           ({ x, y }) => x >= 0 && x < 10 && y >= 0 && y < 10,
         );
@@ -329,20 +408,25 @@ class ManageDOM {
 
         // Create ship instance
         currentShip = new Ship(shipSize, shipCoordinates);
+
+        this.areShipsOverlapping(currentShip);
       });
 
       cell.addEventListener("dragleave", () => {
-        gridCells.forEach((cell) => {
-          cell.classList.remove("highlight");
-        });
+        this.removeHighlight();
       });
 
       cell.addEventListener("drop", (event) => {
         event.preventDefault();
 
-        gridCells.forEach((cell) => {
-          cell.classList.remove("highlight");
-        });
+        let isCellAvailable = this.canShipBePlaced(currentShip, orientation);
+
+        if (!isCellAvailable) {
+          console.log("Cannot place ship!");
+          return; // Prevents placement
+        }
+
+        this.removeHighlight();
 
         //if (!currentShip) return;
 
