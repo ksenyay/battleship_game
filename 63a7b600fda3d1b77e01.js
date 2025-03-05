@@ -1,6 +1,4 @@
-"use strict";
-
-require("./styles.css");
+import "./styles.css";
 class Ship {
   constructor(length, coordinates) {
     this.length = length;
@@ -27,10 +25,11 @@ class GameBoard {
     }
   }
   placeShip(ship) {
-    ship.coordinates.forEach(({
-      x,
-      y
-    }) => {
+    ship.coordinates.forEach(_ref => {
+      let {
+        x,
+        y
+      } = _ref;
       if (this.board[x][y] === "") {
         this.board[x][y] = "S";
       }
@@ -41,10 +40,11 @@ class GameBoard {
   receiveAttack(x, y) {
     let isHit = false;
     this.ships.forEach(ship => {
-      ship.coordinates.forEach(({
-        x: shipX,
-        y: shipY
-      }) => {
+      ship.coordinates.forEach(_ref2 => {
+        let {
+          x: shipX,
+          y: shipY
+        } = _ref2;
         if (shipX === x && shipY === y) {
           this.currentShip = ship;
           ship.hit();
@@ -209,10 +209,11 @@ class ManageDOM {
     this.renderBoard(this.player2);
   }
   areShipsOverlapping(currentShip) {
-    const isOverlappingRed = currentShip.coordinates.some(({
-      x,
-      y
-    }) => {
+    const isOverlappingRed = currentShip.coordinates.some(_ref3 => {
+      let {
+        x,
+        y
+      } = _ref3;
       const cell = document.querySelector(`.grid-element-${this.currentPlayer.name}[data-col="${y}"][data-row="${x}"]`);
       return cell && cell.classList.contains("unavailable");
     });
@@ -337,17 +338,21 @@ class ManageDOM {
 
         // Check if ship fits within grid boundaries
         if (!shipCoordinates) return;
-        const isWithinBounds = shipCoordinates.every(({
-          x,
-          y
-        }) => x >= 0 && x < 10 && y >= 0 && y < 10);
+        const isWithinBounds = shipCoordinates.every(_ref4 => {
+          let {
+            x,
+            y
+          } = _ref4;
+          return x >= 0 && x < 10 && y >= 0 && y < 10;
+        });
         if (!isWithinBounds) return;
 
         // Highlight cells
-        shipCoordinates.forEach(({
-          x,
-          y
-        }) => {
+        shipCoordinates.forEach(_ref5 => {
+          let {
+            x,
+            y
+          } = _ref5;
           const cellToHighlight = document.querySelector(`.grid-element-${player.name}[data-col="${y}"][data-row="${x}"]`);
           if (cellToHighlight) cellToHighlight.classList.add("highlight");
         });
@@ -658,7 +663,9 @@ class ManageDOM {
   }
 }
 class GameManager {
-  static createNewGame(name1 = "Player 1", name2 = "Player 2") {
+  static createNewGame() {
+    let name1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "Player 1";
+    let name2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Player 2";
     const newGame = new ManageDOM(name1, name2);
     newGame.init();
   }
