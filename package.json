@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "webpack --mode production",
     "dev": "webpack serve",
     "test": "jest",
     "deploy": "gh-pages -d dist"

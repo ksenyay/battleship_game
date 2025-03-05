@@ -265,9 +265,6 @@ class ManageDOM {
   }
 
   canShipBePlaced(currentShip, orientation) {
-    if (!currentShip.coordinates) {
-      return false;
-    }
     if (!currentShip.coordinates.length === currentShip.size) {
       return false;
     }
@@ -416,7 +413,6 @@ class ManageDOM {
 
         // Create ship instance
         currentShip = new Ship(shipSize, shipCoordinates);
-
         this.areShipsOverlapping(currentShip);
       });
 
@@ -428,11 +424,11 @@ class ManageDOM {
         this.playBubbleSplashSound();
         event.preventDefault();
 
-        if (currentShip.coordinates) {
+        console.log(currentShip.coordinates);
+        if (currentShip || currentShip.coordinates) {
           let isCellAvailable = this.canShipBePlaced(currentShip, orientation);
 
           if (!isCellAvailable) {
-            console.log("Cannot place ship!");
             return; // Prevents placement
           }
         }
@@ -474,9 +470,18 @@ class ManageDOM {
           playerOneName.classList.add("active");
           playerTwoName.classList.remove("active");
 
-          document.querySelectorAll(".grid-container div").forEach((item) => {
-            item.classList.remove(".unavailable");
-          });
+          document
+            .querySelectorAll(`.grid-element-${this.player1.name}`)
+            .forEach((item) => {
+              item.classList.remove("unavailable");
+            });
+
+          document
+            .querySelectorAll(`.grid-element-${this.player2.name}`)
+            .forEach((item) => {
+              item.classList.remove("unavailable");
+            });
+
           this.makeMove();
         }
       });
