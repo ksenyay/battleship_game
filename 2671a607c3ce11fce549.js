@@ -1,4 +1,9 @@
 import "./styles.css";
+import splashSound from "./sounds/splash.mp3";
+import clappingSound from "./sounds/clapping.mp3";
+import explosionSound from "./sounds/explosion.mp3";
+import bubbleSound from "./sounds/bubble.mp3";
+import drowningSound from "./sounds/drown.mp3";
 class Ship {
   constructor(length, coordinates) {
     this.length = length;
@@ -224,6 +229,9 @@ class ManageDOM {
     }
   }
   canShipBePlaced(currentShip, orientation) {
+    if (!currentShip.coordinates) {
+      return false;
+    }
     if (!currentShip.coordinates.length === currentShip.size) {
       return false;
     }
@@ -365,19 +373,18 @@ class ManageDOM {
         this.removeHighlight();
       });
       cell.addEventListener("drop", event => {
+        this.playBubbleSplashSound();
         event.preventDefault();
-        let isCellAvailable = this.canShipBePlaced(currentShip, orientation);
-        if (!isCellAvailable) {
-          console.log("Cannot place ship!");
-          return; // Prevents placement
+        if (currentShip.coordinates) {
+          let isCellAvailable = this.canShipBePlaced(currentShip, orientation);
+          if (!isCellAvailable) {
+            console.log("Cannot place ship!");
+            return; // Prevents placement
+          }
         }
         this.removeHighlight();
-
-        //if (!currentShip) return;
-
         ShipPlacer.updateCounter(shipSize);
         shipSize = null;
-        //currentShip.draggable = false;
 
         // Place ship on player's board
         player.playerBoard.placeShip(currentShip);
@@ -403,6 +410,9 @@ class ManageDOM {
           this.currentPlayer = this.player1;
           playerOneName.classList.add("active");
           playerTwoName.classList.remove("active");
+          document.querySelectorAll(".grid-container div").forEach(item => {
+            item.classList.remove(".unavailable");
+          });
           this.makeMove();
         }
       });
@@ -470,6 +480,26 @@ class ManageDOM {
       popup.classList.add("fade-out");
     }, time);
   }
+  playMissSound() {
+    const miss = new Audio(splashSound);
+    miss.play();
+  }
+  playExplosionSound() {
+    const explosion = new Audio(explosionSound);
+    explosion.play();
+  }
+  playClappingSound() {
+    const clapping = new Audio(clappingSound);
+    clapping.play();
+  }
+  playBubbleSplashSound() {
+    const bubble = new Audio(bubbleSound);
+    bubble.play();
+  }
+  playDrowningSound() {
+    const drowning = new Audio(drowningSound);
+    drowning.play();
+  }
   makeMove() {
     document.querySelector("footer").style.display = "none";
     document.querySelector(".show-ships").style.display = "flex";
@@ -494,10 +524,11 @@ class ManageDOM {
           //
           if (hitOrMiss === "Hit!") {
             item.style.color = "red";
+            this.playExplosionSound();
           } else if (hitOrMiss === "The ship has sunk!") {
+            this.playDrowningSound();
             let coordinates = opponent.playerBoard.returnCoordinates();
             coordinates.forEach(coord => {
-              console.log(coord);
               let gridElements = document.querySelectorAll(`.grid-element-${opponent.name}[data-col="${coord.y}"][data-row="${coord.x}"]`);
               gridElements.forEach(element => {
                 element.style.color = "black";
@@ -506,11 +537,13 @@ class ManageDOM {
           }
           item.dataset.clicked = "true";
           if (opponent.playerBoard.reportSunk()) {
+            this.playClappingSound();
             this.createPopup(`Congrats! ${this.currentPlayer.name.slice(0, 1).toUpperCase() + this.currentPlayer.name.slice(1, this.currentPlayer.name.length)} wins!`, 10000);
             this.restartGameHandler();
           } else {
             if (hitOrMiss === "Miss!") {
               this.createPopup(`${hitOrMiss}`, 3000);
+              this.playMissSound();
               this.switchPlayer();
             } else {
               this.createPopup(`${hitOrMiss} Please continue, ${this.currentPlayer.name}!`, 3000);
@@ -536,6 +569,7 @@ class ManageDOM {
     restartButton.addEventListener("click", () => {
       GameManager.restartGame();
       document.querySelector(".popup").remove();
+      document.querySelector(".board-container").style.marginTop = "100px";
       restartButton.style.display = "none";
       showShipsButton.style.display = "block";
       this.currentPlayer = this.player2;
