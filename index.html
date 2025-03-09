@@ -1,1 +1,82 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="3ffd74c9b62c05846887.js" defer="defer"></script><link rel="icon" href="data:,"><title>Battleship</title><script defer="defer" src="main.js"></script></head><body><div class="background"><header><h1>Battleship Game</h1><img src="e3008e35d5b781bb9ec7.png" alt="battleship" class="battleship-img"></header><form class="form"><h2>Please enter player names:</h2><div><label for="player-one">Player 1</label><input id="player-one" name="player_one_name" required maxlength="15"> <label for="player-two">Player 2</label><input id="player-two" name="player_two_name" required maxlength="15"></div><button type="submit" class="start-game">Start Game</button></form><div class="board-container"><div class="player-names"><div class="name-container"><h3 class="player-name active" id="player-one-name"></h3></div><div class="name-container"><h3 class="player-name" id="player-two-name"></h3></div></div><div class="gameboard"></div><div class="show"><button class="show-ships">Show Ships</button></div></div></div><footer><div class="ship-counter"><div class="ship-counter-4">1</div><div class="ship-counter-3">2</div><div class="ship-counter-2">3</div><div class="ship-counter-1">4</div></div><div class="ship-container"><div class="ship-manager"><div id="four-cell-ship" class="ship" draggable="true" data-size="4"><div></div><div></div><div></div><div></div></div><div id="three-cell-ship" class="ship" draggable="true" data-size="3"><div></div><div></div><div></div></div><div id="two-cell-ship" class="ship" draggable="true" data-size="2"><div></div><div></div></div><div id="one-cell-ship" class="ship" draggable="true" data-size="1"><div></div></div></div><button type="button" class="rotate-button"><img src="ced023ddfdba8f7df704.png" alt=""></button></div></footer></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="b4156966ba605cb0b34f.js" defer></script>
+    <link rel="icon" href="data:,">
+    <title>Battleship</title>
+<script defer src="main.js"></script></head>
+<body>
+    <div class="background">
+        <header>
+            <h1>Battleship Game</h1>
+            <img src="e3008e35d5b781bb9ec7.png" alt="battleship" class="battleship-img">
+        </header>
+        <div class="game-mode">
+            <h2>Select Game Mode:</h2>
+            <button class="player-mode">Player VS Player</button>
+            <button class="computer-mode">Player VS Computer</button>
+        </div>
+        <form class="form">
+            <h2>Please enter player names:</h2>
+            <div>
+                <label for="player-one">Player 1</label><input type="text" id="player-one" name="player_one_name" required maxlength="15">
+                <label for="player-two">Player 2</label><input type="text" id="player-two" name="player_two_name" required maxlength="15">
+            </div>
+            <button type="submit" class="start-game">Start Game</button>
+        </form>
+        <div class="board-container">
+            <div class="player-names">
+                <div class="name-container">
+                    <h3 class="player-name active" id="player-one-name"></h3>
+                </div>
+                <div class="name-container">
+                    <h3 class="player-name" id="player-two-name"></h3>
+                </div>
+            </div>
+            <div class="gameboard"></div>       
+            <div class="show">
+                <button class="show-ships">Show Ships</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+      
+        <div class="ship-counter">
+            <div class="ship-counter-4">1</div>
+            <div class="ship-counter-3">2</div>
+            <div class="ship-counter-2">3</div>
+            <div class="ship-counter-1">4</div>
+        </div>
+        <div class="ship-container">
+            <div class="ship-manager">
+                <div id="four-cell-ship" class="ship" draggable="true" data-size="4">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <div id="three-cell-ship" class="ship" draggable="true" data-size="3">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <div id="two-cell-ship" class="ship" draggable="true" data-size="2">
+                    <div></div>
+                    <div></div>
+                </div>
+                <div id="one-cell-ship" class="ship" draggable="true" data-size="1">
+                    <div></div>
+                </div>
+ 
+            </div>
+            <button type="button" class="rotate-button">
+                <img src="ced023ddfdba8f7df704.png" alt="">
+            </button>
+        </div>
+    </footer>
+    
+</body>
+</html>
