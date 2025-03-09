@@ -640,7 +640,6 @@ class ManageDOM {
       });
 
       cell.addEventListener("drop", (event) => {
-        console.log("dsds");
         this.playBubbleSplashSound();
         event.preventDefault();
 
@@ -931,7 +930,6 @@ class ManageDOM {
   }
 
   restartGameHandler() {
-    console.log("restart game handler");
     const showShipsButton = document.querySelector(".show-ships");
 
     if (showShipsButton) showShipsButton.style.display = "none";
