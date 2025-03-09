@@ -233,7 +233,7 @@ class ComputerShipPlacer {
       for (let placedShip of this.placedShips) {
         for (let { x: px, y: py } of placedShip) {
           if (Math.abs(x - px) <= 1 && Math.abs(y - py) <= 1) {
-            return false; // Too close to another ship
+            return false;
           }
         }
       }
@@ -500,13 +500,13 @@ class ManageDOM {
   markAdjacentCells(coordinates) {
     let directions = [
       { x: -1, y: 0 },
-      { x: 1, y: 0 }, // Left & Right
+      { x: 1, y: 0 },
       { x: 0, y: -1 },
-      { x: 0, y: 1 }, // Up & Down
+      { x: 0, y: 1 },
       { x: -1, y: -1 },
-      { x: -1, y: 1 }, // Top-Left & Top-Right
+      { x: -1, y: 1 },
       { x: 1, y: -1 },
-      { x: 1, y: 1 }, // Bottom-Left & Bottom-Right
+      { x: 1, y: 1 },
     ];
 
     coordinates.forEach((coord) => {
@@ -516,7 +516,7 @@ class ManageDOM {
         let key = `${newX},${newY}`;
 
         if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10) {
-          this.computerAttacks.add(key); // Mark as attacked so the AI won't choose it
+          this.computerAttacks.add(key);
         }
       });
     });
