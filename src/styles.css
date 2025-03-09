@@ -438,3 +438,31 @@ div[data-ship="true"] {
   transition: transform 0.3s ease;
   background-color: rgb(255, 255, 255, 0);
 }
+
+/* GAME MODE COMPUTER */
+
+.game-mode {
+  width: 300px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.game-mode h2 {
+  margin-bottom: 20px;
+}
+
+.game-mode button {
+  width: 150px;
+  box-shadow: 0px 0px 24px 0px rgba(95, 95, 95, 0.2);
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  cursor: pointer;
+  border: 1px solid #2a3335;
+  font-size: 1.3em;
+}
+
+.game-mode button:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.3);
+}

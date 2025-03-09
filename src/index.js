@@ -96,12 +96,13 @@ class RealPlayer extends Player {
     this.name = name;
   }
 }
-/*
+
 class Computer extends Player {
-  constructor() {
+  constructor(name) {
     super();
+    this.name = name;
   }
-}*/
+}
 
 // SHIP MANAGER
 
@@ -217,19 +218,100 @@ class ShipPlacer {
   }
 }
 
+class ComputerShipPlacer {
+  constructor(player) {
+    this.placedShips = []; // Stores already placed ship coordinates
+    this.player = player;
+  }
+
+  getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  isValidPlacement(shipCoordinates) {
+    for (let { x, y } of shipCoordinates) {
+      for (let placedShip of this.placedShips) {
+        for (let { x: px, y: py } of placedShip) {
+          if (Math.abs(x - px) <= 1 && Math.abs(y - py) <= 1) {
+            return false; // Too close to another ship
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  generateShip(shipLength) {
+    while (true) {
+      let row = this.getRandomNumber(0, 10);
+      let col = this.getRandomNumber(0, 10);
+      let direction = this.getRandomNumber(0, 2); // 0 = horizontal, 1 = vertical
+      let shipCoordinates = [];
+
+      if (direction === 0 && col + shipLength <= 10) {
+        for (let i = 0; i < shipLength; i++) {
+          shipCoordinates.push({ x: row, y: col + i });
+        }
+      } else if (direction === 1 && row + shipLength <= 10) {
+        for (let i = 0; i < shipLength; i++) {
+          shipCoordinates.push({ x: row + i, y: col });
+        }
+      }
+
+      if (
+        shipCoordinates.length === shipLength &&
+        this.isValidPlacement(shipCoordinates)
+      ) {
+        this.placedShips.push(shipCoordinates);
+        let ship = new Ship(shipLength, shipCoordinates);
+        this.player.playerBoard.placeShip(ship);
+        return { size: shipLength, coordinates: shipCoordinates };
+      }
+    }
+  }
+
+  generateAllShips() {
+    const shipCounts = { 1: 4, 2: 3, 3: 2, 4: 1 };
+    let allShips = [];
+
+    for (const [size, count] of Object.entries(shipCounts)) {
+      for (let i = 0; i < count; i++) {
+        allShips.push(this.generateShip(parseInt(size)));
+      }
+    }
+
+    return allShips;
+  }
+}
+
 class ManageDOM {
-  constructor(name1, name2) {
+  constructor(name1, name2, isComputer) {
     this.player1 = new RealPlayer(name1);
     this.player2 = new RealPlayer(name2);
 
+    this.computer = new Computer(name2);
+
+    this.isComputer = isComputer;
     this.currentPlayer = this.player1;
 
     this.areShipsVisible = false;
+
+    this.computerAttacks = new Set();
+
+    this.lastHit = null;
+    this.targetStack = [];
 
     this.init = () => {
       this.playerOneBoard();
       this.playerTwoBoard();
       this.buttonEventListeners();
+      this.renderNameTags();
+    };
+
+    this.initComputer = () => {
+      this.playerOneBoard();
+      this.computerBoard();
+
       this.renderNameTags();
     };
   }
@@ -245,6 +327,11 @@ class ManageDOM {
   playerTwoBoard() {
     this.player2.playerBoard.createBoard();
     this.renderBoard(this.player2);
+  }
+
+  computerBoard() {
+    this.computer.playerBoard.createBoard();
+    this.renderBoard(this.computer);
   }
 
   areShipsOverlapping(currentShip) {
@@ -323,6 +410,137 @@ class ManageDOM {
     gridCells.forEach((cell) => {
       cell.classList.remove("highlight");
       cell.draggable = false;
+    });
+  }
+
+  placeComputerShips() {
+    const computerShipPlacer = new ComputerShipPlacer(this.computer);
+    computerShipPlacer.generateAllShips();
+  }
+
+  getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  makeComputerMove() {
+    setTimeout(() => {
+      const playerBoard = document.querySelectorAll(`.grid-element-Computer`);
+      playerBoard.forEach((item) => {
+        item.style.pointerEvents = "none";
+      });
+
+      let x, y;
+
+      if (this.targetStack.length > 0) {
+        ({ x, y } = this.targetStack.pop());
+      } else {
+        do {
+          x = this.getRandomNumber(0, 9);
+          y = this.getRandomNumber(0, 9);
+        } while (this.computerAttacks.has(`${x},${y}`));
+      }
+
+      this.computerAttacks.add(`${x},${y}`);
+
+      let cell = document.querySelector(
+        `.grid-element-Player[data-col="${y}"][data-row="${x}"]`,
+      );
+
+      this.player1.playerBoard.receiveAttack(x, y);
+      cell.textContent = this.player1.playerBoard.board[x][y];
+
+      let hitOrMiss = this.player1.playerBoard.attackResult();
+
+      if (hitOrMiss === "Hit!") {
+        cell.style.color = "red";
+        this.playExplosionSound();
+        this.createPopup(`${hitOrMiss}`, 2000);
+
+        this.lastHit = { x, y };
+        this.addTargetCells(x, y);
+
+        this.makeComputerMove();
+      } else if (hitOrMiss === "The ship has sunk!") {
+        this.playDrowningSound();
+
+        this.lastHit = null;
+        this.targetStack = [];
+
+        this.createPopup(`${hitOrMiss}`, 2000);
+
+        this.makeComputerMove();
+
+        let coordinates = this.player1.playerBoard.returnCoordinates();
+        this.markAdjacentCells(coordinates);
+
+        coordinates.forEach((coord) => {
+          let gridElements = document.querySelectorAll(
+            `.grid-element-Player[data-col="${coord.y}"][data-row="${coord.x}"]`,
+          );
+          gridElements.forEach((element) => {
+            element.style.color = "black";
+          });
+        });
+      }
+
+      if (this.player1.playerBoard.reportSunk()) {
+        this.playClappingSound();
+        this.createPopup(`Computer wins!`, 10000);
+        this.restartGameHandler();
+      } else if (hitOrMiss === "Miss!") {
+        this.createPopup(`${hitOrMiss} Player turn!`, 2000);
+        this.playMissSound();
+        playerBoard.forEach((item) => {
+          item.style.pointerEvents = "auto";
+        });
+      }
+    }, 2000);
+  }
+
+  markAdjacentCells(coordinates) {
+    let directions = [
+      { x: -1, y: 0 },
+      { x: 1, y: 0 }, // Left & Right
+      { x: 0, y: -1 },
+      { x: 0, y: 1 }, // Up & Down
+      { x: -1, y: -1 },
+      { x: -1, y: 1 }, // Top-Left & Top-Right
+      { x: 1, y: -1 },
+      { x: 1, y: 1 }, // Bottom-Left & Bottom-Right
+    ];
+
+    coordinates.forEach((coord) => {
+      directions.forEach((dir) => {
+        let newX = coord.x + dir.x;
+        let newY = coord.y + dir.y;
+        let key = `${newX},${newY}`;
+
+        if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10) {
+          this.computerAttacks.add(key); // Mark as attacked so the AI won't choose it
+        }
+      });
+    });
+  }
+
+  addTargetCells(x, y) {
+    let possibleMoves = [
+      { x: x + 1, y: y },
+      { x: x - 1, y: y },
+      { x: x, y: y + 1 },
+      { x: x, y: y - 1 },
+    ];
+
+    possibleMoves.forEach((move) => {
+      let key = `${move.x},${move.y}`;
+      if (
+        move.x >= 0 &&
+        move.x < 10 &&
+        move.y >= 0 &&
+        move.y < 10 &&
+        !this.computerAttacks.has(key)
+      ) {
+        this.targetStack.push(move);
+      }
     });
   }
 
@@ -421,10 +639,10 @@ class ManageDOM {
       });
 
       cell.addEventListener("drop", (event) => {
+        console.log("dsds");
         this.playBubbleSplashSound();
         event.preventDefault();
 
-        console.log(currentShip.coordinates);
         if (currentShip || currentShip.coordinates) {
           let isCellAvailable = this.canShipBePlaced(currentShip, orientation);
 
@@ -452,37 +670,45 @@ class ManageDOM {
         const playerOneName = document.querySelector("#player-one-name");
         const playerTwoName = document.querySelector("#player-two-name");
 
-        if (areShipsPlaced && this.currentPlayer === this.player1) {
-          ShipPlacer.restartShips();
-          this.hideShips(player);
-          this.currentPlayer = this.player2;
+        // checking if the player is computer or not
+        if (this.isComputer === false) {
+          if (areShipsPlaced && this.currentPlayer === this.player1) {
+            ShipPlacer.restartShips();
+            this.hideShips(player);
+            this.currentPlayer = this.player2;
 
-          // Changes player
-          playerOneName.classList.remove("active");
-          playerTwoName.classList.add("active");
+            // Changes player
+            playerOneName.classList.remove("active");
+            playerTwoName.classList.add("active");
 
-          this.placeShips(this.player2);
-        } else if (areShipsPlaced && this.currentPlayer === this.player2) {
-          this.hideShips(player);
+            this.placeShips(this.player2);
+          } else if (areShipsPlaced && this.currentPlayer === this.player2) {
+            this.hideShips(player);
 
-          // Changes player
-          this.currentPlayer = this.player1;
-          playerOneName.classList.add("active");
-          playerTwoName.classList.remove("active");
+            // Changes player
+            this.currentPlayer = this.player1;
+            playerOneName.classList.add("active");
+            playerTwoName.classList.remove("active");
 
-          document
-            .querySelectorAll(`.grid-element-${this.player1.name}`)
-            .forEach((item) => {
-              item.classList.remove("unavailable");
-            });
+            document
+              .querySelectorAll(`.grid-element-${this.player1.name}`)
+              .forEach((item) => {
+                item.classList.remove("unavailable");
+              });
 
-          document
-            .querySelectorAll(`.grid-element-${this.player2.name}`)
-            .forEach((item) => {
-              item.classList.remove("unavailable");
-            });
+            document
+              .querySelectorAll(`.grid-element-${this.player2.name}`)
+              .forEach((item) => {
+                item.classList.remove("unavailable");
+              });
 
-          this.makeMove();
+            this.makeMove();
+          }
+        } else {
+          if (areShipsPlaced) {
+            this.placeComputerShips();
+            this.makeMove();
+          }
         }
       });
     });
@@ -597,9 +823,15 @@ class ManageDOM {
 
   makeMove() {
     document.querySelector("footer").style.display = "none";
-    document.querySelector(".show-ships").style.display = "flex";
     document.querySelector(".rotate-button").style.display = "none";
     document.querySelector(".board-container").style.marginTop = "150px";
+
+    if (this.isComputer === true) {
+      const showShipsButton = document.querySelector(".show-ships");
+      showShipsButton.style.display = "none";
+    } else {
+      document.querySelector(".show-ships").style.display = "flex";
+    }
 
     this.createPopup(
       `Let's begin! ${this.player1.name.slice(0, 1).toUpperCase() + this.player1.name.slice(1, this.player1.name.length)} attack first.`,
@@ -610,8 +842,13 @@ class ManageDOM {
       item.dataset.clicked = "false";
 
       item.addEventListener("click", (event) => {
-        let opponent =
-          this.currentPlayer === this.player1 ? this.player2 : this.player1;
+        let opponent;
+        if (this.isComputer === false) {
+          opponent =
+            this.currentPlayer === this.player1 ? this.player2 : this.player1;
+        } else {
+          opponent = this.computer;
+        }
 
         if (!event.target.classList.contains(`grid-element-${opponent.name}`)) {
           this.createPopup("You can't attack your own board!", 2000);
@@ -656,9 +893,21 @@ class ManageDOM {
             this.restartGameHandler();
           } else {
             if (hitOrMiss === "Miss!") {
-              this.createPopup(`${hitOrMiss}`, 3000);
+              this.createPopup(`${hitOrMiss}`, 2000);
               this.playMissSound();
-              this.switchPlayer();
+
+              if (this.isComputer === false) {
+                this.switchPlayer();
+              } else {
+                const playerBoard = document.querySelectorAll(
+                  `.grid-element-Computer`,
+                );
+                playerBoard.forEach((item) => {
+                  item.style.pointerEvents = "none";
+                });
+                this.createPopup(`${hitOrMiss} Computer turn!`, 2000);
+                this.makeComputerMove();
+              }
             } else {
               this.createPopup(
                 `${hitOrMiss} Please continue, ${this.currentPlayer.name}!`,
@@ -675,7 +924,8 @@ class ManageDOM {
 
   restartGameHandler() {
     const showShipsButton = document.querySelector(".show-ships");
-    showShipsButton.style.display = "none";
+
+    if (showShipsButton) showShipsButton.style.display = "none";
 
     const restartButton = document.createElement("button");
     document.querySelector(".show").appendChild(restartButton);
@@ -692,6 +942,11 @@ class ManageDOM {
 
       document.querySelector(".popup").remove();
       document.querySelector(".board-container").style.marginTop = "100px";
+      document.querySelector("h1").style.display = "block";
+      document.querySelector(".battleship-img").style.display = "block";
+
+      const boardContainer = document.querySelector(".board-container");
+      boardContainer.style.display = "none";
 
       restartButton.style.display = "none";
       showShipsButton.style.display = "block";
@@ -768,9 +1023,15 @@ class ManageDOM {
     const playerOneGrid = document.querySelectorAll(
       `.grid-element-${this.player1.name}`,
     );
-    const playerTwoGrid = document.querySelectorAll(
-      `.grid-element-${this.player2.name}`,
-    );
+    let playerTwoGrid;
+
+    if (this.isComputer == false) {
+      playerTwoGrid = document.querySelectorAll(
+        `.grid-element-${this.player2.name}`,
+      );
+    } else {
+      playerTwoGrid = document.querySelectorAll(`.grid-element-Computer`);
+    }
 
     playerOneGrid.forEach((item) => {
       if (item.dataset.ship === "true") {
@@ -858,25 +1119,60 @@ class ManageDOM {
 
 class GameManager {
   static createNewGame(name1 = "Player 1", name2 = "Player 2") {
-    const newGame = new ManageDOM(name1, name2);
+    const newGame = new ManageDOM(name1, name2, false);
     newGame.init();
+  }
+
+  static createNewComputerGame() {
+    const newGame = new ManageDOM("Player", "Computer", true);
+
+    const boardContainer = document.querySelector(".board-container");
+    boardContainer.style.display = "block";
+    document.querySelector(".game-mode").style.display = "none";
+
+    newGame.initComputer();
   }
 
   static restartGame() {
     const board = document.querySelector(".gameboard");
     board.innerHTML = "";
 
-    this.getNameInputs();
+    document.querySelector(".game-mode").style.display = "block";
+
+    this.selectGameMode();
+  }
+
+  static selectGameMode() {
+    document.querySelector("h1").style.display = "block";
+    document.querySelector(".battleship-img").style.display = "block";
+
+    const boardContainer = document.querySelector(".board-container");
+    boardContainer.style.display = "none";
+
+    document.querySelector("form").style.display = "none";
+
+    const playerMode = document.querySelector(".player-mode");
+    const computerMode = document.querySelector(".computer-mode");
+
+    playerMode.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      this.getNameInputs();
+    });
+
+    computerMode.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      this.createNewComputerGame();
+    });
   }
 
   static getNameInputs() {
     const form = document.querySelector("form");
     const boardContainer = document.querySelector(".board-container");
-    document.querySelector("h1").style.display = "block";
-    document.querySelector(".battleship-img").style.display = "block";
+    document.querySelector(".game-mode").style.display = "none";
 
     form.style.display = "flex";
-    boardContainer.style.display = "none";
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -905,5 +1201,5 @@ class GameManager {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  GameManager.getNameInputs();
+  GameManager.selectGameMode();
 });
