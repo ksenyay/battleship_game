@@ -630,6 +630,10 @@ class ManageDOM {
             document.querySelectorAll(`.grid-element-${this.player2.name}`).forEach(item => {
               item.classList.remove("unavailable");
             });
+            const playerCells = document.querySelectorAll(`.grid-element-${this.player2.name}`);
+            playerCells.forEach(cell => {
+              cell.style.pointerEvents = "auto";
+            });
             this.makeMove();
           }
         } else {
