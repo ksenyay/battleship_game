@@ -703,6 +703,13 @@ class ManageDOM {
                 item.classList.remove("unavailable");
               });
 
+            const playerCells = document.querySelectorAll(
+              `.grid-element-${this.player2.name}`,
+            );
+            playerCells.forEach((cell) => {
+              cell.style.pointerEvents = "auto";
+            });
+
             this.makeMove();
           }
         } else {
