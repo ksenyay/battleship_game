@@ -798,11 +798,16 @@ class ManageDOM {
     });
   }
   restartGameHandler() {
+    console.log("restart game handler");
     const showShipsButton = document.querySelector(".show-ships");
     if (showShipsButton) showShipsButton.style.display = "none";
+    if (document.querySelector(".restart")) {
+      console.log("Restart button already exists!");
+      return;
+    }
     const restartButton = document.createElement("button");
+    restartButton.classList.add("restart");
     document.querySelector(".show").appendChild(restartButton);
-    restartButton.classList.add(".restart");
     restartButton.textContent = "Restart Game";
     this.showAllShips();
     document.querySelectorAll(".grid-container div").forEach(item => {
@@ -816,8 +821,9 @@ class ManageDOM {
       document.querySelector(".battleship-img").style.display = "block";
       const boardContainer = document.querySelector(".board-container");
       boardContainer.style.display = "none";
-      restartButton.style.display = "none";
-      showShipsButton.style.display = "block";
+      document.querySelector(".show").removeChild(restartButton);
+      //restartButton.style.display = "none";
+      //showShipsButton.style.display = "none";
       this.currentPlayer = this.player2;
       this.switchPlayer();
     });
@@ -876,12 +882,7 @@ class ManageDOM {
   }
   showAllShips() {
     const playerOneGrid = document.querySelectorAll(`.grid-element-${this.player1.name}`);
-    let playerTwoGrid;
-    if (this.isComputer == false) {
-      playerTwoGrid = document.querySelectorAll(`.grid-element-${this.player2.name}`);
-    } else {
-      playerTwoGrid = document.querySelectorAll(`.grid-element-Computer`);
-    }
+    const playerTwoGrid = document.querySelectorAll(`.grid-element-${this.player2.name}`);
     playerOneGrid.forEach(item => {
       if (item.dataset.ship === "true") {
         if (item.textContent === "X") {
